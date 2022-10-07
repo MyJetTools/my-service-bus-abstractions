@@ -21,6 +21,6 @@ pub trait MySbMessageSerializer {
     fn serialize(&self) -> Result<Vec<u8>, String>;
 }
 
-pub trait MySbMessageDeserializer {
-    fn deserialize(src: &[u8]) -> Result<Box<Self>, String>;
+pub trait MySbMessageDeserializer<T> {
+    fn deserialize(src: &[u8]) -> Result<T, String>;
 }
