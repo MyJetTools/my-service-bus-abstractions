@@ -5,12 +5,12 @@ pub trait MyServiceBusPublisherClient {
     async fn publish_message(
         &self,
         topic_name: &str,
-        message: MessageToPublish,
+        message: &MessageToPublish,
     ) -> Result<(), PublishError>;
     async fn publish_messages(
         &self,
         topic_name: &str,
-        message: Vec<MessageToPublish>,
+        message: &[MessageToPublish],
     ) -> Result<(), PublishError>;
 }
 

@@ -4,8 +4,8 @@ use crate::{MessageToPublish, MySbMessageSerializer, MyServiceBusPublisherClient
 
 pub struct MyServiceBusPublisher<TContract> {
     pub topic_name: String,
-    client: Arc<dyn MyServiceBusPublisherClient + Send + Sync + 'static>,
-    serializer: Arc<dyn MySbMessageSerializer<TContract> + Send + Sync + 'static>,
+    pub client: Arc<dyn MyServiceBusPublisherClient + Send + Sync + 'static>,
+    pub serializer: Arc<dyn MySbMessageSerializer<TContract> + Send + Sync + 'static>,
 }
 
 impl<TContract> MyServiceBusPublisher<TContract> {
@@ -33,7 +33,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         self.client
             .publish_message(
                 &self.topic_name,
-                MessageToPublish {
+                &MessageToPublish {
                     headers: None,
                     content,
                 },
@@ -57,7 +57,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         self.client
             .publish_message(
                 &self.topic_name,
-                MessageToPublish {
+                &MessageToPublish {
                     headers: Some(headers),
                     content,
                 },
@@ -84,7 +84,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         }
 
         self.client
-            .publish_messages(&self.topic_name, messages_to_publish)
+            .publish_messages(&self.topic_name, &messages_to_publish)
             .await
     }
 
@@ -107,7 +107,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         }
 
         self.client
-            .publish_messages(&self.topic_name, messages_to_publish)
+            .publish_messages(&self.topic_name, &messages_to_publish)
             .await
     }
 }
