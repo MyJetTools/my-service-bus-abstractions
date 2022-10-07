@@ -1,5 +1,5 @@
 [package]
-name = "my-servicebus-abstractions"
+name = "my-service-bus-abstractions"
 version = "0.1.0"
 edition = "2021"
 
