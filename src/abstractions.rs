@@ -6,28 +6,14 @@ pub trait MyServiceBusPublisherClient {
         &self,
         topic_name: &str,
         message: MessageToPublish,
+        do_retry: bool,
     ) -> Result<(), PublishError>;
 
     async fn publish_messages(
         &self,
         topic_name: &str,
         message: Vec<MessageToPublish>,
-    ) -> Result<(), PublishError>;
-
-    async fn publish_message_with_retries(
-        &self,
-        topic_name: &str,
-        message: MessageToPublish,
-        retries_amount: usize,
-        retry_delay: std::time::Duration,
-    ) -> Result<(), PublishError>;
-
-    async fn publish_messages_with_retries(
-        &self,
-        topic_name: &str,
-        message: Vec<MessageToPublish>,
-        retries_amount: usize,
-        retry_delay: std::time::Duration,
+        do_retry: bool,
     ) -> Result<(), PublishError>;
 }
 

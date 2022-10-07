@@ -6,6 +6,7 @@ pub struct MyServiceBusPublisher<TContract> {
     pub topic_name: String,
     pub client: Arc<dyn MyServiceBusPublisherClient + Send + Sync + 'static>,
     pub serializer: Arc<dyn MySbMessageSerializer<TContract> + Send + Sync + 'static>,
+    pub do_retries: bool,
 }
 
 impl<TContract> MyServiceBusPublisher<TContract> {
@@ -13,11 +14,13 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         topic_name: String,
         client: Arc<dyn MyServiceBusPublisherClient + Send + Sync + 'static>,
         serializer: Arc<dyn MySbMessageSerializer<TContract> + Send + Sync + 'static>,
+        do_retries: bool,
     ) -> Self {
         Self {
             topic_name,
             client,
             serializer,
+            do_retries,
         }
     }
 
@@ -37,6 +40,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
                     headers: None,
                     content,
                 },
+                self.do_retries,
             )
             .await
     }
@@ -61,6 +65,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
                     headers: Some(headers),
                     content,
                 },
+                self.do_retries,
             )
             .await
     }
@@ -84,7 +89,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         }
 
         self.client
-            .publish_messages(&self.topic_name, messages_to_publish)
+            .publish_messages(&self.topic_name, messages_to_publish, self.do_retries)
             .await
     }
 
@@ -107,7 +112,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         }
 
         self.client
-            .publish_messages(&self.topic_name, messages_to_publish)
+            .publish_messages(&self.topic_name, messages_to_publish, self.do_retries)
             .await
     }
 }
