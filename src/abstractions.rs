@@ -1,7 +1,9 @@
+use crate::MessageToPublish;
+
 #[async_trait::async_trait]
 pub trait MyServiceBusClient {
-    async fn publish_message(&self, topic_name: &str, payload: Vec<u8>);
-    async fn publish_messages(&self, topic_name: &str, payloads: Vec<Vec<u8>>);
+    async fn publish_message(&self, topic_name: &str, message: MessageToPublish);
+    async fn publish_messages(&self, topic_name: &str, message: Vec<MessageToPublish>);
 }
 
 pub trait MySbMessageSerializer<TContract> {
