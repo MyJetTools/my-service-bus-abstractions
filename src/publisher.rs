@@ -38,9 +38,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
                     content,
                 },
             )
-            .await;
-
-        Ok(())
+            .await
     }
 
     pub async fn publish_with_headers(
@@ -64,9 +62,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
                     content,
                 },
             )
-            .await;
-
-        Ok(())
+            .await
     }
 
     pub async fn publish_messages(&self, messages: &[TContract]) -> Result<(), PublishError> {
@@ -89,9 +85,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
 
         self.client
             .publish_messages(&self.topic_name, messages_to_publish)
-            .await;
-
-        Ok(())
+            .await
     }
 
     pub async fn publish_messages_with_header(
@@ -114,8 +108,6 @@ impl<TContract> MyServiceBusPublisher<TContract> {
 
         self.client
             .publish_messages(&self.topic_name, messages_to_publish)
-            .await;
-
-        Ok(())
+            .await
     }
 }
