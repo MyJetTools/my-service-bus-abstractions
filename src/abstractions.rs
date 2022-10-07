@@ -1,7 +1,7 @@
 use crate::MessageToPublish;
 
 #[async_trait::async_trait]
-pub trait MyServiceBusClient {
+pub trait MyServiceBusPublisherClient {
     async fn publish_message(&self, topic_name: &str, message: MessageToPublish);
     async fn publish_messages(&self, topic_name: &str, message: Vec<MessageToPublish>);
 }

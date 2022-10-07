@@ -1,17 +1,17 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::{MessageToPublish, MySbMessageSerializer, MyServiceBusClient, PublishError};
+use crate::{MessageToPublish, MySbMessageSerializer, MyServiceBusPublisherClient, PublishError};
 
 pub struct MyServiceBusPublisher<TContract> {
     pub topic_name: String,
-    client: Arc<dyn MyServiceBusClient + Send + Sync + 'static>,
+    client: Arc<dyn MyServiceBusPublisherClient + Send + Sync + 'static>,
     serializer: Arc<dyn MySbMessageSerializer<TContract> + Send + Sync + 'static>,
 }
 
 impl<TContract> MyServiceBusPublisher<TContract> {
     pub fn new(
         topic_name: String,
-        client: Arc<dyn MyServiceBusClient + Send + Sync + 'static>,
+        client: Arc<dyn MyServiceBusPublisherClient + Send + Sync + 'static>,
         serializer: Arc<dyn MySbMessageSerializer<TContract> + Send + Sync + 'static>,
     ) -> Self {
         Self {
