@@ -17,7 +17,6 @@ pub trait MyServiceBusPublisherClient {
     ) -> Result<(), PublishError>;
 }
 
-pub trait MySbMessageSerializer<TContract> {
-    fn serialize(&self, contract: &TContract) -> Result<Vec<u8>, String>;
-    fn deserialize(&self, contracts: &[u8]) -> Result<TContract, String>;
+pub trait MySbMessageSerializer {
+    fn serialize(&self) -> Result<Vec<u8>, String>;
 }
