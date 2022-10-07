@@ -33,7 +33,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         self.client
             .publish_message(
                 &self.topic_name,
-                &MessageToPublish {
+                MessageToPublish {
                     headers: None,
                     content,
                 },
@@ -57,7 +57,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         self.client
             .publish_message(
                 &self.topic_name,
-                &MessageToPublish {
+                MessageToPublish {
                     headers: Some(headers),
                     content,
                 },
@@ -84,7 +84,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         }
 
         self.client
-            .publish_messages(&self.topic_name, &messages_to_publish)
+            .publish_messages(&self.topic_name, messages_to_publish)
             .await
     }
 
@@ -107,7 +107,7 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         }
 
         self.client
-            .publish_messages(&self.topic_name, &messages_to_publish)
+            .publish_messages(&self.topic_name, messages_to_publish)
             .await
     }
 }
