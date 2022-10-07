@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::{MessageToPublish, MySbMessageSerializer, MyServiceBusClient};
+use crate::{MessageToPublish, MySbMessageSerializer, MyServiceBusClient, PublishError};
 
 pub struct MyServiceBusPublisher<TContract> {
     pub topic_name: String,
@@ -21,8 +21,15 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         }
     }
 
-    pub async fn publish(&self, message: &TContract) {
-        let content = self.serializer.serialize(message).unwrap();
+    pub async fn publish(&self, message: &TContract) -> Result<(), PublishError> {
+        let content = self.serializer.serialize(message);
+
+        if let Err(err) = content {
+            return Err(PublishError::SerializationError(err));
+        }
+
+        let content = content.unwrap();
+
         self.client
             .publish_message(
                 &self.topic_name,
@@ -32,14 +39,23 @@ impl<TContract> MyServiceBusPublisher<TContract> {
                 },
             )
             .await;
+
+        Ok(())
     }
 
     pub async fn publish_with_headers(
         &self,
         message: &TContract,
         headers: HashMap<String, String>,
-    ) {
-        let content = self.serializer.serialize(message).unwrap();
+    ) -> Result<(), PublishError> {
+        let content = self.serializer.serialize(message);
+
+        if let Err(err) = content {
+            return Err(PublishError::SerializationError(err));
+        }
+
+        let content = content.unwrap();
+
         self.client
             .publish_message(
                 &self.topic_name,
@@ -49,13 +65,22 @@ impl<TContract> MyServiceBusPublisher<TContract> {
                 },
             )
             .await;
+
+        Ok(())
     }
 
-    pub async fn publish_messages(&self, messages: &[TContract]) {
+    pub async fn publish_messages(&self, messages: &[TContract]) -> Result<(), PublishError> {
         let mut messages_to_publish = Vec::with_capacity(messages.len());
 
         for message in messages {
-            let content = self.serializer.serialize(message).unwrap();
+            let content = self.serializer.serialize(message);
+
+            if let Err(err) = content {
+                return Err(PublishError::SerializationError(err));
+            }
+
+            let content = content.unwrap();
+
             messages_to_publish.push(MessageToPublish {
                 headers: None,
                 content,
@@ -65,21 +90,32 @@ impl<TContract> MyServiceBusPublisher<TContract> {
         self.client
             .publish_messages(&self.topic_name, messages_to_publish)
             .await;
+
+        Ok(())
     }
 
     pub async fn publish_messages_with_header(
         &self,
         messages: Vec<(TContract, Option<HashMap<String, String>>)>,
-    ) {
+    ) -> Result<(), PublishError> {
         let mut messages_to_publish = Vec::with_capacity(messages.len());
 
         for (contract, headers) in messages {
-            let content = self.serializer.serialize(&contract).unwrap();
+            let content = self.serializer.serialize(&contract);
+
+            if let Err(err) = content {
+                return Err(PublishError::SerializationError(err));
+            }
+
+            let content = content.unwrap();
+
             messages_to_publish.push(MessageToPublish { content, headers });
         }
 
         self.client
             .publish_messages(&self.topic_name, messages_to_publish)
             .await;
+
+        Ok(())
     }
 }
