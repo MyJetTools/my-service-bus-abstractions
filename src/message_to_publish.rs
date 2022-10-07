@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-
+#[derive(Debug, Clone)]
 pub struct MessageToPublish {
     pub headers: Option<HashMap<String, String>>,
     pub content: Vec<u8>,
