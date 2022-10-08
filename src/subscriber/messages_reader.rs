@@ -3,98 +3,52 @@ use std::{
     sync::Arc,
 };
 
-use rust_extensions::Logger;
-
 use crate::{
     queue_with_intervals::QueueWithIntervals,
     subscriber::{MySbDeliveredMessage, MySbMessageDeserializer},
-    MyServiceBusSubscriberClient,
 };
 
-use super::MySbTypedDeliveredMessage;
+use super::SubscriberData;
 
-pub struct MessagesReader {
+pub struct MessagesReader<TContract: MySbMessageDeserializer<Item = TContract>> {
+    data: Arc<SubscriberData>,
     total_messages_amount: i64,
-
-    pub topic_id: String,
-    pub queue_id: String,
-    messages: VecDeque<MySbDeliveredMessage>,
+    messages: VecDeque<MySbDeliveredMessage<TContract>>,
     pub confirmation_id: i64,
     delivered: QueueWithIntervals,
-    subscriber_client: Arc<dyn MyServiceBusSubscriberClient + Send + Sync + 'static>,
-
-    logger: Arc<dyn Logger + Send + Sync + 'static>,
 }
 
-impl MessagesReader {
+impl<TContract: MySbMessageDeserializer<Item = TContract>> MessagesReader<TContract> {
     pub fn new(
-        topic_id: String,
-        queue_id: String,
-        messages: VecDeque<MySbDeliveredMessage>,
+        data: Arc<SubscriberData>,
+        messages: VecDeque<MySbDeliveredMessage<TContract>>,
         confirmation_id: i64,
-        subscriber_client: Arc<dyn MyServiceBusSubscriberClient + Send + Sync + 'static>,
-        logger: Arc<dyn Logger + Send + Sync + 'static>,
     ) -> Self {
         let total_messages_amount = messages.len() as i64;
         Self {
-            topic_id,
-            queue_id,
+            data,
             messages,
             confirmation_id,
-            subscriber_client,
             delivered: QueueWithIntervals::new(),
             total_messages_amount,
-            logger,
         }
     }
 
-    pub fn handled_ok(&mut self, msg: &MySbDeliveredMessage) {
+    pub fn handled_ok(&mut self, msg: &MySbDeliveredMessage<TContract>) {
         self.delivered.enqueue(msg.id);
     }
 
-    pub fn get_next_message<TContract: MySbMessageDeserializer<Item = TContract>>(
-        &mut self,
-    ) -> Option<MySbTypedDeliveredMessage<TContract>> {
-        loop {
-            let next_message = self.messages.pop_front()?;
-
-            match TContract::deserialize(&next_message.content, &next_message.headers) {
-                Ok(content) => {
-                    let result = MySbTypedDeliveredMessage {
-                        id: next_message.id,
-                        attempt_no: next_message.attempt_no,
-                        headers: next_message.headers,
-                        content,
-                        raw: next_message.content,
-                    };
-
-                    return Some(result);
-                }
-                Err(err) => {
-                    let mut ctx = HashMap::new();
-
-                    ctx.insert("topicId".to_string(), self.topic_id.clone());
-                    ctx.insert("queueId".to_string(), self.queue_id.clone());
-                    ctx.insert("messageId".to_string(), next_message.id.to_string());
-                    ctx.insert("attemptNo".to_string(), next_message.attempt_no.to_string());
-
-                    self.logger.write_fatal_error(
-                        "get_next_message".to_string(),
-                        format!("Can not deserialize message. Err: {:?}", err),
-                        Some(ctx),
-                    )
-                }
-            }
-        }
+    pub fn get_next_message(&mut self) -> Option<MySbDeliveredMessage<TContract>> {
+        self.messages.pop_front()
     }
 }
 
-impl Drop for MessagesReader {
+impl<TContract: MySbMessageDeserializer<Item = TContract>> Drop for MessagesReader<TContract> {
     fn drop(&mut self) {
         if self.delivered.len() == self.total_messages_amount {
-            self.subscriber_client.confirm_delivery(
-                self.topic_id.as_str(),
-                self.queue_id.as_str(),
+            self.data.client.confirm_delivery(
+                self.data.topic_id.as_str(),
+                self.data.queue_id.as_str(),
                 self.confirmation_id,
                 true,
             );
@@ -105,18 +59,18 @@ impl Drop for MessagesReader {
                 self.confirmation_id.to_string(),
             );
 
-            log_context.insert("TopicId".to_string(), self.topic_id.to_string());
-            log_context.insert("QueueId".to_string(), self.queue_id.to_string());
+            log_context.insert("TopicId".to_string(), self.data.topic_id.to_string());
+            log_context.insert("QueueId".to_string(), self.data.queue_id.to_string());
 
-            self.logger.write_error(
+            self.data.logger.write_error(
                 "Sending delivery confirmation".to_string(),
                 "All messages confirmed as fail".to_string(),
                 Some(log_context),
             );
 
-            self.subscriber_client.confirm_delivery(
-                self.topic_id.as_str(),
-                self.queue_id.as_str(),
+            self.data.client.confirm_delivery(
+                self.data.topic_id.as_str(),
+                self.data.queue_id.as_str(),
                 self.confirmation_id,
                 false,
             );
@@ -127,10 +81,10 @@ impl Drop for MessagesReader {
                 self.confirmation_id.to_string(),
             );
 
-            log_context.insert("TopicId".to_string(), self.topic_id.to_string());
-            log_context.insert("QueueId".to_string(), self.queue_id.to_string());
+            log_context.insert("TopicId".to_string(), self.data.topic_id.to_string());
+            log_context.insert("QueueId".to_string(), self.data.queue_id.to_string());
 
-            self.logger.write_error(
+            self.data.logger.write_error(
                 "Sending delivery confirmation".to_string(),
                 format!(
                     "{} messages out of {} confirmed as Delivered",
@@ -139,9 +93,9 @@ impl Drop for MessagesReader {
                 ),
                 Some(log_context),
             );
-            self.subscriber_client.confirm_some_messages_ok(
-                self.topic_id.as_str(),
-                self.queue_id.as_str(),
+            self.data.client.confirm_some_messages_ok(
+                self.data.topic_id.as_str(),
+                self.data.queue_id.as_str(),
                 self.confirmation_id,
                 self.delivered.clone(),
             );

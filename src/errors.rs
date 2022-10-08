@@ -11,3 +11,8 @@ impl Into<PublishError> for String {
         PublishError::Other(self)
     }
 }
+
+#[derive(Debug)]
+pub enum SubscriberError {
+    CanNotDeserializeMessage(String),
+}

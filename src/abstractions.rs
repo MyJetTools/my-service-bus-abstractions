@@ -1,4 +1,4 @@
-use crate::{publisher::MessageToPublish, subscriber::MessagesReader, PublishError};
+use crate::{publisher::MessageToPublish, subscriber::MySbMessageToDeliver, PublishError};
 
 pub type MessageId = i64;
 
@@ -41,6 +41,10 @@ pub trait MyServiceBusSubscriberClient {
 }
 
 #[async_trait::async_trait]
-pub trait MySbSubscriberCallback {
-    async fn new_events(&self, messages_reader: MessagesReader);
+pub trait MyServiceBusSubscriberClientCallback {
+    async fn new_events(
+        &self,
+        messages_to_deliver: Vec<MySbMessageToDeliver>,
+        confirmation_id: i64,
+    );
 }
