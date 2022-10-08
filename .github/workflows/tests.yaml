@@ -15,8 +15,8 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Build default          
-      - run: cargo build
+      - name: Build default
+        run: cargo build
 
       - name: Build with-telemetry          
-      - run: cargo build --features my-telemetry
+        run: cargo build --features my-telemetry
