@@ -71,7 +71,12 @@ impl<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'stati
         self.data.queue_type
     }
 
-    async fn new_events(&self, messages_to_deliver: Vec<MySbMessage>, confirmation_id: i64) {
+    async fn new_events(
+        &self,
+        messages_to_deliver: Vec<MySbMessage>,
+        confirmation_id: i64,
+        connection_id: i64,
+    ) {
         let mut messages = VecDeque::with_capacity(messages_to_deliver.len());
 
         let mut can_not_serialize_messages = QueueWithIntervals::new();
@@ -110,6 +115,7 @@ impl<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'stati
                 &self.data.topic_id,
                 &self.data.queue_id,
                 confirmation_id,
+                connection_id,
                 true,
             );
 
@@ -131,7 +137,8 @@ impl<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'stati
             return;
         }
 
-        let reader = MessagesReader::new(self.data.clone(), messages, confirmation_id);
+        let reader =
+            MessagesReader::new(self.data.clone(), messages, confirmation_id, connection_id);
 
         let callback = self.callback.clone();
         tokio::spawn(async move {

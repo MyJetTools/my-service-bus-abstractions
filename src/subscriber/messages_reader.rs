@@ -16,6 +16,7 @@ pub struct MessagesReader<TContract: MySbMessageDeserializer<Item = TContract>> 
     messages: VecDeque<MySbDeliveredMessage<TContract>>,
     pub confirmation_id: i64,
     delivered: QueueWithIntervals,
+    connection_id: i64,
 }
 
 impl<TContract: MySbMessageDeserializer<Item = TContract>> MessagesReader<TContract> {
@@ -23,6 +24,7 @@ impl<TContract: MySbMessageDeserializer<Item = TContract>> MessagesReader<TContr
         data: Arc<SubscriberData>,
         messages: VecDeque<MySbDeliveredMessage<TContract>>,
         confirmation_id: i64,
+        connection_id: i64,
     ) -> Self {
         let total_messages_amount = messages.len() as i64;
         Self {
@@ -31,6 +33,7 @@ impl<TContract: MySbMessageDeserializer<Item = TContract>> MessagesReader<TContr
             confirmation_id,
             delivered: QueueWithIntervals::new(),
             total_messages_amount,
+            connection_id,
         }
     }
 
@@ -50,6 +53,7 @@ impl<TContract: MySbMessageDeserializer<Item = TContract>> Drop for MessagesRead
                 self.data.topic_id.as_str(),
                 self.data.queue_id.as_str(),
                 self.confirmation_id,
+                self.connection_id,
                 true,
             );
         } else if self.delivered.len() == 0 {
@@ -72,6 +76,7 @@ impl<TContract: MySbMessageDeserializer<Item = TContract>> Drop for MessagesRead
                 self.data.topic_id.as_str(),
                 self.data.queue_id.as_str(),
                 self.confirmation_id,
+                self.connection_id,
                 false,
             );
         } else {
@@ -97,6 +102,7 @@ impl<TContract: MySbMessageDeserializer<Item = TContract>> Drop for MessagesRead
                 self.data.topic_id.as_str(),
                 self.data.queue_id.as_str(),
                 self.confirmation_id,
+                self.connection_id,
                 self.delivered.clone(),
             );
         };

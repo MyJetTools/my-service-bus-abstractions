@@ -28,6 +28,7 @@ pub trait MyServiceBusSubscriberClient {
         topic_id: &str,
         queue_id: &str,
         confirmation_id: i64,
+        connection_id: i64,
         delivered: bool,
     );
 
@@ -36,6 +37,7 @@ pub trait MyServiceBusSubscriberClient {
         topic_id: &str,
         queue_id: &str,
         confirmation_id: i64,
+        connection_id: i64,
         ok_messages: crate::queue_with_intervals::QueueWithIntervals,
     );
 }
@@ -46,5 +48,10 @@ pub trait MyServiceBusSubscriberClientCallback {
     fn get_queue_id(&self) -> &str;
     fn get_queue_type(&self) -> TopicQueueType;
 
-    async fn new_events(&self, messages_to_deliver: Vec<MySbMessage>, confirmation_id: i64);
+    async fn new_events(
+        &self,
+        messages_to_deliver: Vec<MySbMessage>,
+        confirmation_id: i64,
+        connection_id: i64,
+    );
 }
