@@ -1,5 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
+#[cfg(feature = "with-telemetry")]
+use my_telemetry::MyTelemetryContext;
 use rust_extensions::Logger;
 
 use crate::{MyServiceBusPublisherClient, PublishError};
@@ -30,7 +32,11 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
         }
     }
 
-    pub async fn publish(&self, message: &TContract) -> Result<(), PublishError> {
+    pub async fn publish(
+        &self,
+        message: &TContract,
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
+    ) -> Result<(), PublishError> {
         let content = message.serialize(None);
 
         if let Err(err) = content {
@@ -41,7 +47,23 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
             return Err(PublishError::SerializationError(err));
         }
 
+        #[cfg(not(feature = "with-telemetry"))]
         let (content, headers) = content.unwrap();
+
+        #[cfg(feature = "with-telemetry")]
+        let (content, mut headers) = content.unwrap();
+
+        #[cfg(feature = "with-telemetry")]
+        if let Some(my_telemetry) = telemetry_context.as_ref() {
+            if headers.is_none() {
+                headers = Some(HashMap::new());
+            }
+
+            headers.as_mut().unwrap().insert(
+                crate::MY_TELEMETRY_HEADER.to_string(),
+                my_telemetry.process_id.to_string(),
+            );
+        }
 
         let result = self
             .client
@@ -69,6 +91,7 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
         &self,
         message: &TContract,
         headers: HashMap<String, String>,
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let content = message.serialize(Some(headers));
 
@@ -84,7 +107,23 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
             return Err(PublishError::SerializationError(err));
         }
 
+        #[cfg(not(feature = "with-telemetry"))]
         let (content, headers) = content.unwrap();
+
+        #[cfg(feature = "with-telemetry")]
+        let (content, mut headers) = content.unwrap();
+
+        #[cfg(feature = "with-telemetry")]
+        if let Some(my_telemetry) = telemetry_context.as_ref() {
+            if headers.is_none() {
+                headers = Some(HashMap::new());
+            }
+
+            headers.as_mut().unwrap().insert(
+                crate::MY_TELEMETRY_HEADER.to_string(),
+                my_telemetry.process_id.to_string(),
+            );
+        }
 
         let result = self
             .client
@@ -108,7 +147,11 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
         result
     }
 
-    pub async fn publish_messages(&self, messages: &[TContract]) -> Result<(), PublishError> {
+    pub async fn publish_messages(
+        &self,
+        messages: &[TContract],
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
+    ) -> Result<(), PublishError> {
         let mut messages_to_publish = Vec::with_capacity(messages.len());
 
         for message in messages {
@@ -126,7 +169,23 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
                 return Err(PublishError::SerializationError(err));
             }
 
+            #[cfg(not(feature = "with-telemetry"))]
             let (content, headers) = content.unwrap();
+
+            #[cfg(feature = "with-telemetry")]
+            let (content, mut headers) = content.unwrap();
+
+            #[cfg(feature = "with-telemetry")]
+            if let Some(my_telemetry) = telemetry_context.as_ref() {
+                if headers.is_none() {
+                    headers = Some(HashMap::new());
+                }
+
+                headers.as_mut().unwrap().insert(
+                    crate::MY_TELEMETRY_HEADER.to_string(),
+                    my_telemetry.process_id.to_string(),
+                );
+            }
 
             messages_to_publish.push(MessageToPublish { headers, content });
         }
@@ -152,6 +211,7 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
     pub async fn publish_messages_with_header(
         &self,
         messages: Vec<(TContract, Option<HashMap<String, String>>)>,
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let mut messages_to_publish = Vec::with_capacity(messages.len());
 
@@ -170,7 +230,23 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
                 return Err(PublishError::SerializationError(err));
             }
 
+            #[cfg(not(feature = "with-telemetry"))]
             let (content, headers) = content.unwrap();
+
+            #[cfg(feature = "with-telemetry")]
+            let (content, mut headers) = content.unwrap();
+
+            #[cfg(feature = "with-telemetry")]
+            if let Some(my_telemetry) = telemetry_context.as_ref() {
+                if headers.is_none() {
+                    headers = Some(HashMap::new());
+                }
+
+                headers.as_mut().unwrap().insert(
+                    crate::MY_TELEMETRY_HEADER.to_string(),
+                    my_telemetry.process_id.to_string(),
+                );
+            }
 
             messages_to_publish.push(MessageToPublish { content, headers });
         }

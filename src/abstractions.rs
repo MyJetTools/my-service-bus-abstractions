@@ -2,6 +2,9 @@ use crate::{publisher::MessageToPublish, subscriber::MessagesReader, PublishErro
 
 pub type MessageId = i64;
 
+#[cfg(feature = "with-telemetry")]
+pub const MY_TELEMETRY_HEADER: &str = "process-id";
+
 #[async_trait::async_trait]
 pub trait MyServiceBusPublisherClient {
     async fn publish_message(
