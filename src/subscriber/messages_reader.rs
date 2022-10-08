@@ -103,7 +103,7 @@ impl<TContract: MySbMessageDeserializer<Item = TContract>> Drop for MessagesRead
                 self.data.queue_id.as_str(),
                 self.confirmation_id,
                 self.connection_id,
-                self.delivered.clone(),
+                self.delivered.get_snapshot(),
             );
         };
     }
