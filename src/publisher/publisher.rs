@@ -1,6 +1,8 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::{MessageToPublish, MySbMessageSerializer, MyServiceBusPublisherClient, PublishError};
+use crate::{MyServiceBusPublisherClient, PublishError};
+
+use super::{MessageToPublish, MySbMessageSerializer};
 
 pub struct MyServiceBusPublisher<TContract: MySbMessageSerializer> {
     pub topic_name: String,
