@@ -4,6 +4,7 @@ use crate::MessageId;
 
 use super::MySbMessageDeserializer;
 
+#[derive(Debug, Clone)]
 pub struct MySbMessageToDeliver {
     pub id: MessageId,
     pub attempt_no: i32,
