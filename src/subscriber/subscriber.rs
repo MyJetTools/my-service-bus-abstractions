@@ -75,7 +75,7 @@ impl<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'stati
         &self,
         messages_to_deliver: Vec<MySbMessage>,
         confirmation_id: i64,
-        connection_id: i64,
+        connection_id: i32,
     ) {
         let mut messages = VecDeque::with_capacity(messages_to_deliver.len());
 

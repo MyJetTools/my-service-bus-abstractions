@@ -16,7 +16,7 @@ pub struct MessagesReader<TContract: MySbMessageDeserializer<Item = TContract>> 
     messages: VecDeque<MySbDeliveredMessage<TContract>>,
     pub confirmation_id: i64,
     delivered: QueueWithIntervals,
-    connection_id: i64,
+    connection_id: i32,
 }
 
 impl<TContract: MySbMessageDeserializer<Item = TContract>> MessagesReader<TContract> {
@@ -24,7 +24,7 @@ impl<TContract: MySbMessageDeserializer<Item = TContract>> MessagesReader<TContr
         data: Arc<SubscriberData>,
         messages: VecDeque<MySbDeliveredMessage<TContract>>,
         confirmation_id: i64,
-        connection_id: i64,
+        connection_id: i32,
     ) -> Self {
         let total_messages_amount = messages.len() as i64;
         Self {
