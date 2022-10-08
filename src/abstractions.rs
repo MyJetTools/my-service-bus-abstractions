@@ -1,8 +1,4 @@
-use crate::{
-    publisher::MessageToPublish,
-    subscriber::{MySbMessageToDeliver, TopicQueueType},
-    PublishError,
-};
+use crate::{publisher::MessageToPublish, subscriber::TopicQueueType, MySbMessage, PublishError};
 
 pub type MessageId = i64;
 
@@ -50,9 +46,5 @@ pub trait MyServiceBusSubscriberClientCallback {
     fn get_queue_id(&self) -> &str;
     fn get_queue_type(&self) -> TopicQueueType;
 
-    async fn new_events(
-        &self,
-        messages_to_deliver: Vec<MySbMessageToDeliver>,
-        confirmation_id: i64,
-    );
+    async fn new_events(&self, messages_to_deliver: Vec<MySbMessage>, confirmation_id: i64);
 }

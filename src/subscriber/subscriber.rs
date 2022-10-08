@@ -6,14 +6,11 @@ use std::{
 use rust_extensions::Logger;
 
 use crate::{
-    queue_with_intervals::QueueWithIntervals, MyServiceBusSubscriberClient,
+    queue_with_intervals::QueueWithIntervals, MySbMessage, MyServiceBusSubscriberClient,
     MyServiceBusSubscriberClientCallback,
 };
 
-use super::{
-    MessagesReader, MySbDeliveredMessage, MySbMessageDeserializer, MySbMessageToDeliver,
-    TopicQueueType,
-};
+use super::{MessagesReader, MySbDeliveredMessage, MySbMessageDeserializer, TopicQueueType};
 
 #[async_trait::async_trait]
 pub trait MySbCallback<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'static>
@@ -74,11 +71,7 @@ impl<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'stati
         self.data.queue_type
     }
 
-    async fn new_events(
-        &self,
-        messages_to_deliver: Vec<MySbMessageToDeliver>,
-        confirmation_id: i64,
-    ) {
+    async fn new_events(&self, messages_to_deliver: Vec<MySbMessage>, confirmation_id: i64) {
         let mut messages = VecDeque::with_capacity(messages_to_deliver.len());
 
         let mut can_not_serialize_messages = QueueWithIntervals::new();

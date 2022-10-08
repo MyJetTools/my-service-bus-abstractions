@@ -4,14 +4,6 @@ use crate::MessageId;
 
 use super::MySbMessageDeserializer;
 
-#[derive(Debug, Clone)]
-pub struct MySbMessageToDeliver {
-    pub id: MessageId,
-    pub attempt_no: i32,
-    pub headers: Option<HashMap<String, String>>,
-    pub content: Vec<u8>,
-}
-
 pub struct MySbDeliveredMessage<TContract: MySbMessageDeserializer<Item = TContract>> {
     pub id: MessageId,
     pub attempt_no: i32,
