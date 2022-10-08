@@ -26,21 +26,18 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
     }
 
     pub async fn publish(&self, message: &TContract) -> Result<(), PublishError> {
-        let content = message.serialize();
+        let content = message.serialize(None);
 
         if let Err(err) = content {
             return Err(PublishError::SerializationError(err));
         }
 
-        let content = content.unwrap();
+        let (content, headers) = content.unwrap();
 
         self.client
             .publish_message(
                 &self.topic_name,
-                MessageToPublish {
-                    headers: None,
-                    content,
-                },
+                MessageToPublish { headers, content },
                 self.do_retries,
             )
             .await
@@ -51,21 +48,18 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
         message: &TContract,
         headers: HashMap<String, String>,
     ) -> Result<(), PublishError> {
-        let content = message.serialize();
+        let content = message.serialize(Some(headers));
 
         if let Err(err) = content {
             return Err(PublishError::SerializationError(err));
         }
 
-        let content = content.unwrap();
+        let (content, headers) = content.unwrap();
 
         self.client
             .publish_message(
                 &self.topic_name,
-                MessageToPublish {
-                    headers: Some(headers),
-                    content,
-                },
+                MessageToPublish { headers, content },
                 self.do_retries,
             )
             .await
@@ -75,18 +69,15 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
         let mut messages_to_publish = Vec::with_capacity(messages.len());
 
         for message in messages {
-            let content = message.serialize();
+            let content = message.serialize(None);
 
             if let Err(err) = content {
                 return Err(PublishError::SerializationError(err));
             }
 
-            let content = content.unwrap();
+            let (content, headers) = content.unwrap();
 
-            messages_to_publish.push(MessageToPublish {
-                headers: None,
-                content,
-            });
+            messages_to_publish.push(MessageToPublish { headers, content });
         }
 
         self.client
@@ -101,13 +92,13 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
         let mut messages_to_publish = Vec::with_capacity(messages.len());
 
         for (contract, headers) in messages {
-            let content = contract.serialize();
+            let content = contract.serialize(headers);
 
             if let Err(err) = content {
                 return Err(PublishError::SerializationError(err));
             }
 
-            let content = content.unwrap();
+            let (content, headers) = content.unwrap();
 
             messages_to_publish.push(MessageToPublish { content, headers });
         }

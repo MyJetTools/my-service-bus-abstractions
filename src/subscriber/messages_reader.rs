@@ -58,7 +58,7 @@ impl MessagesReader {
         loop {
             let next_message = self.messages.pop_front()?;
 
-            match TContract::deserialize(&next_message.content) {
+            match TContract::deserialize(&next_message.content, &next_message.headers) {
                 Ok(content) => {
                     let result = MySbTypedDeliveredMessage {
                         id: next_message.id,
