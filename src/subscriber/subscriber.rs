@@ -63,6 +63,17 @@ impl<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'stati
 impl<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'static>
     MyServiceBusSubscriberClientCallback for Subscriber<TContract>
 {
+    fn get_topic_id(&self) -> &str {
+        self.data.topic_id.as_str()
+    }
+
+    fn get_queue_id(&self) -> &str {
+        self.data.queue_id.as_str()
+    }
+    fn get_queue_type(&self) -> TopicQueueType {
+        self.data.queue_type
+    }
+
     async fn new_events(
         &self,
         messages_to_deliver: Vec<MySbMessageToDeliver>,
