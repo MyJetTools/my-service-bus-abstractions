@@ -19,7 +19,7 @@ pub struct PublisherWithInternalQueue<TMessageModel: MySbMessageSerializer> {
 }
 
 impl<TMessageModel: MySbMessageSerializer> PublisherWithInternalQueue<TMessageModel> {
-    pub async fn new(
+    pub fn new(
         topic_id: String,
         client: Arc<dyn MyServiceBusPublisherClient + Send + Sync + 'static>,
         logger: Arc<dyn rust_extensions::Logger + Send + Sync + 'static>,
