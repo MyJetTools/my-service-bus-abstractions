@@ -8,15 +8,15 @@ use crate::{MyServiceBusPublisherClient, PublishError};
 
 use super::{MessageToPublish, MySbMessageSerializer};
 
-pub struct MyServiceBusPublisher<TContract: MySbMessageSerializer> {
+pub struct MyServiceBusPublisher<TMessageModel: MySbMessageSerializer> {
     pub topic_id: String,
     pub client: Arc<dyn MyServiceBusPublisherClient + Send + Sync + 'static>,
     pub do_retries: bool,
-    pub itm: Option<TContract>,
+    pub itm: Option<TMessageModel>,
     pub logger: Arc<dyn Logger + Send + Sync + 'static>,
 }
 
-impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
+impl<TMessageModel: MySbMessageSerializer> MyServiceBusPublisher<TMessageModel> {
     pub fn new(
         topic_id: String,
         client: Arc<dyn MyServiceBusPublisherClient + Send + Sync + 'static>,
@@ -34,7 +34,7 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
 
     pub async fn publish(
         &self,
-        message: &TContract,
+        message: &TMessageModel,
         #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let content = message.serialize(None);
@@ -89,7 +89,7 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
 
     pub async fn publish_with_headers(
         &self,
-        message: &TContract,
+        message: &TMessageModel,
         headers: HashMap<String, String>,
         #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
     ) -> Result<(), PublishError> {
@@ -149,7 +149,7 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
 
     pub async fn publish_messages(
         &self,
-        messages: &[TContract],
+        messages: &[TMessageModel],
         #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let mut messages_to_publish = Vec::with_capacity(messages.len());
@@ -210,7 +210,7 @@ impl<TContract: MySbMessageSerializer> MyServiceBusPublisher<TContract> {
 
     pub async fn publish_messages_with_header(
         &self,
-        messages: Vec<(TContract, Option<HashMap<String, String>>)>,
+        messages: Vec<(TMessageModel, Option<HashMap<String, String>>)>,
         #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let mut messages_to_publish = Vec::with_capacity(messages.len());

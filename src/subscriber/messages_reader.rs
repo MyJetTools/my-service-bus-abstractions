@@ -10,19 +10,19 @@ use crate::{
 
 use super::SubscriberData;
 
-pub struct MessagesReader<TContract: MySbMessageDeserializer<Item = TContract>> {
+pub struct MessagesReader<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> {
     data: Arc<SubscriberData>,
     total_messages_amount: i64,
-    messages: VecDeque<MySbDeliveredMessage<TContract>>,
+    messages: VecDeque<MySbDeliveredMessage<TMessageModel>>,
     pub confirmation_id: i64,
     delivered: QueueWithIntervals,
     connection_id: i32,
 }
 
-impl<TContract: MySbMessageDeserializer<Item = TContract>> MessagesReader<TContract> {
+impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> MessagesReader<TMessageModel> {
     pub fn new(
         data: Arc<SubscriberData>,
-        messages: VecDeque<MySbDeliveredMessage<TContract>>,
+        messages: VecDeque<MySbDeliveredMessage<TMessageModel>>,
         confirmation_id: i64,
         connection_id: i32,
     ) -> Self {
@@ -37,16 +37,18 @@ impl<TContract: MySbMessageDeserializer<Item = TContract>> MessagesReader<TContr
         }
     }
 
-    pub fn handled_ok(&mut self, msg: &MySbDeliveredMessage<TContract>) {
+    pub fn handled_ok(&mut self, msg: &MySbDeliveredMessage<TMessageModel>) {
         self.delivered.enqueue(msg.id);
     }
 
-    pub fn get_next_message(&mut self) -> Option<MySbDeliveredMessage<TContract>> {
+    pub fn get_next_message(&mut self) -> Option<MySbDeliveredMessage<TMessageModel>> {
         self.messages.pop_front()
     }
 }
 
-impl<TContract: MySbMessageDeserializer<Item = TContract>> Drop for MessagesReader<TContract> {
+impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> Drop
+    for MessagesReader<TMessageModel>
+{
     fn drop(&mut self) {
         if self.delivered.len() == self.total_messages_amount {
             self.data.client.confirm_delivery(

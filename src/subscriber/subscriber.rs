@@ -13,9 +13,11 @@ use crate::{
 use super::{MessagesReader, MySbDeliveredMessage, MySbMessageDeserializer, TopicQueueType};
 
 #[async_trait::async_trait]
-pub trait MySbCallback<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'static>
+pub trait MySbCallback<
+    TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync + 'static,
+>
 {
-    async fn handle_messages(&self, messages_reader: MessagesReader<TContract>);
+    async fn handle_messages(&self, messages_reader: MessagesReader<TMessageModel>);
 }
 
 pub struct SubscriberData {
@@ -26,19 +28,19 @@ pub struct SubscriberData {
     pub client: Arc<dyn MyServiceBusSubscriberClient + Sync + Send + 'static>,
 }
 
-pub struct Subscriber<TContract: MySbMessageDeserializer<Item = TContract>> {
+pub struct Subscriber<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> {
     data: Arc<SubscriberData>,
-    pub callback: Arc<dyn MySbCallback<TContract> + Sync + Send + 'static>,
+    pub callback: Arc<dyn MySbCallback<TMessageModel> + Sync + Send + 'static>,
 }
 
-impl<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'static>
-    Subscriber<TContract>
+impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync + 'static>
+    Subscriber<TMessageModel>
 {
     pub fn new(
         topic_id: String,
         queue_id: String,
         queue_type: TopicQueueType,
-        callback: Arc<dyn MySbCallback<TContract> + Sync + Send + 'static>,
+        callback: Arc<dyn MySbCallback<TMessageModel> + Sync + Send + 'static>,
         logger: Arc<dyn Logger + Sync + Send + 'static>,
         client: Arc<dyn MyServiceBusSubscriberClient + Sync + Send + 'static>,
     ) -> Self {
@@ -57,8 +59,8 @@ impl<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'stati
 }
 
 #[async_trait::async_trait]
-impl<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'static>
-    MyServiceBusSubscriberClientCallback for Subscriber<TContract>
+impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync + 'static>
+    MyServiceBusSubscriberClientCallback for Subscriber<TMessageModel>
 {
     fn get_topic_id(&self) -> &str {
         self.data.topic_id.as_str()
@@ -84,7 +86,7 @@ impl<TContract: MySbMessageDeserializer<Item = TContract> + Send + Sync + 'stati
         let mut deserialize_error = None;
 
         for msg in messages_to_deliver {
-            let content_result = TContract::deserialize(&msg.content, &msg.headers);
+            let content_result = TMessageModel::deserialize(&msg.content, &msg.headers);
 
             match content_result {
                 Ok(contract) => {
