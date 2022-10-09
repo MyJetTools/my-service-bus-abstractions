@@ -55,3 +55,7 @@ pub trait MyServiceBusSubscriberClientCallback {
         connection_id: i32,
     );
 }
+
+pub trait GetMySbModelTopicId {
+    fn get_topic_id(&self) -> &str;
+}
