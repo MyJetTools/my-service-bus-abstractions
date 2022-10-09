@@ -1,10 +1,12 @@
 mod delivered_message;
 mod deserializer;
 mod messages_reader;
+mod my_sb_callback;
 mod queue_type;
 mod subscriber;
 pub use delivered_message::*;
 pub use deserializer::*;
 pub use messages_reader::*;
+pub use my_sb_callback::*;
 pub use queue_type::*;
 pub use subscriber::*;

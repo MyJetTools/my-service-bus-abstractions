@@ -10,15 +10,9 @@ use crate::{
     MyServiceBusSubscriberClientCallback,
 };
 
-use super::{MessagesReader, MySbDeliveredMessage, MySbMessageDeserializer, TopicQueueType};
-
-#[async_trait::async_trait]
-pub trait MySbCallback<
-    TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync + 'static,
->
-{
-    async fn handle_messages(&self, messages_reader: MessagesReader<TMessageModel>);
-}
+use super::{
+    MessagesReader, MySbCallback, MySbDeliveredMessage, MySbMessageDeserializer, TopicQueueType,
+};
 
 pub struct SubscriberData {
     pub topic_id: String,
@@ -90,6 +84,21 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync 
 
             match content_result {
                 Ok(contract) => {
+                    #[cfg(feature = "with-telemetry")]
+                    let mut msg = MySbDeliveredMessage {
+                        id: msg.id,
+                        attempt_no: msg.attempt_no,
+                        headers: msg.headers,
+                        content: contract,
+                        raw: msg.content,
+                        my_telemetry_ctx: None,
+                        event_tracker: None,
+                    };
+
+                    #[cfg(feature = "with-telemetry")]
+                    msg.init_telemetry_context(self.get_topic_id(), self.get_queue_id());
+
+                    #[cfg(not(feature = "with-telemetry"))]
                     let msg = MySbDeliveredMessage {
                         id: msg.id,
                         attempt_no: msg.attempt_no,
@@ -143,6 +152,7 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync 
             MessagesReader::new(self.data.clone(), messages, confirmation_id, connection_id);
 
         let callback = self.callback.clone();
+
         tokio::spawn(async move {
             callback.handle_messages(reader).await;
         });
