@@ -17,7 +17,7 @@ pub trait MyServiceBusPublisherClient {
     async fn publish_messages(
         &self,
         topic_id: &str,
-        message: Vec<MessageToPublish>,
+        message: &[MessageToPublish],
         do_retry: bool,
     ) -> Result<(), PublishError>;
 }

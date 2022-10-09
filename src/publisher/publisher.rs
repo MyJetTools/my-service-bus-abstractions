@@ -192,7 +192,7 @@ impl<TMessageModel: MySbMessageSerializer> MyServiceBusPublisher<TMessageModel> 
 
         let result = self
             .client
-            .publish_messages(&self.topic_id, messages_to_publish, self.do_retries)
+            .publish_messages(&self.topic_id, &messages_to_publish, self.do_retries)
             .await;
 
         if let Err(err) = &result {
@@ -253,7 +253,7 @@ impl<TMessageModel: MySbMessageSerializer> MyServiceBusPublisher<TMessageModel> 
 
         let result = self
             .client
-            .publish_messages(&self.topic_id, messages_to_publish, self.do_retries)
+            .publish_messages(&self.topic_id, &messages_to_publish, self.do_retries)
             .await;
 
         if let Err(err) = &result {
