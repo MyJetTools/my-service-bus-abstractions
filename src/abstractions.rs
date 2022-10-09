@@ -57,5 +57,5 @@ pub trait MyServiceBusSubscriberClientCallback {
 }
 
 pub trait GetMySbModelTopicId {
-    fn get_topic_id(&self) -> &str;
+    fn get_topic_id() -> &'static str;
 }
