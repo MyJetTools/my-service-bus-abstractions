@@ -72,6 +72,41 @@ impl<TMessageModel: MySbMessageSerializer> PublisherWithInternalQueue<TMessageMo
         Ok(())
     }
 
+    pub async fn publish_chunk_and_forget(
+        &self,
+        messages: Vec<TMessageModel>,
+    ) -> Result<(), PublishError> {
+        let mut to_publish = Vec::with_capacity(messages.len());
+
+        for message in messages {
+            let result = message.serialize(None);
+
+            if let Err(err) = result {
+                return Err(PublishError::SerializationError(err));
+            }
+
+            let (content, headers) = result.unwrap();
+            let msg_to_publish = MessageToPublish { headers, content };
+            to_publish.push(msg_to_publish);
+        }
+
+        let mut write_access = self.data.queue_to_publish.lock().await;
+        for msg in to_publish {
+            write_access.queue.push_back(msg);
+        }
+
+        if let Err(err) = self.event_sender.send(()) {
+            let mut ctx = HashMap::new();
+            ctx.insert("topicId".to_string(), self.data.topic_id.to_string());
+            self.data.logger.write_error(
+                "publish_and_forget".to_string(),
+                format!("Can not publish message. Err: {}", err),
+                Some(ctx),
+            )
+        }
+
+        Ok(())
+    }
     pub async fn get_queue_size(&self) -> usize {
         let read_access = self.data.queue_to_publish.lock().await;
         read_access.queue.len() + read_access.being_published
