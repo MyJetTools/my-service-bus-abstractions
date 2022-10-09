@@ -119,14 +119,16 @@ async fn events_publisher(
 ) {
     let mut to_publish = None;
     loop {
-        tokio::sync::mpsc::UnboundedReceiver::recv(&mut event_receiver).await;
+        if to_publish.is_none() {
+            tokio::sync::mpsc::UnboundedReceiver::recv(&mut event_receiver).await;
+        }
 
         if to_publish.is_none() {
             to_publish = data.get_messages_to_publish().await;
         }
 
         if to_publish.is_none() {
-            return;
+            continue;
         }
 
         if data.publish(to_publish.as_ref().unwrap()).await {
