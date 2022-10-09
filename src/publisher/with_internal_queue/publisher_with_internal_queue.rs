@@ -121,9 +121,6 @@ async fn events_publisher(
     loop {
         if to_publish.is_none() {
             tokio::sync::mpsc::UnboundedReceiver::recv(&mut event_receiver).await;
-        }
-
-        if to_publish.is_none() {
             to_publish = data.get_messages_to_publish().await;
         }
 
