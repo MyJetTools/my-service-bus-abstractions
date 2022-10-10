@@ -13,7 +13,7 @@ use super::SubscriberData;
 pub struct MessagesReader<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> {
     data: Arc<SubscriberData>,
     total_messages_amount: i64,
-    messages: VecDeque<MySbDeliveredMessage<TMessageModel>>,
+    messages: Option<VecDeque<MySbDeliveredMessage<TMessageModel>>>,
     pub confirmation_id: i64,
     delivered: QueueWithIntervals,
     connection_id: i32,
@@ -29,7 +29,7 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> MessagesReade
         let total_messages_amount = messages.len() as i64;
         Self {
             data,
-            messages,
+            messages: Some(messages),
             confirmation_id,
             delivered: QueueWithIntervals::new(),
             total_messages_amount,
@@ -42,7 +42,12 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> MessagesReade
     }
 
     pub fn get_next_message(&mut self) -> Option<MySbDeliveredMessage<TMessageModel>> {
-        self.messages.pop_front()
+        let messages = self.messages.as_mut()?;
+        messages.pop_front()
+    }
+
+    pub fn get_all(&mut self) -> Option<VecDeque<MySbDeliveredMessage<TMessageModel>>> {
+        self.messages.take()
     }
 }
 
