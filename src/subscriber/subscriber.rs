@@ -11,7 +11,8 @@ use crate::{
 };
 
 use super::{
-    MessagesReader, MySbCallback, MySbDeliveredMessage, MySbMessageDeserializer, TopicQueueType,
+    MessagesReader, MySbDeliveredMessage, MySbMessageDeserializer, SubscriberCallback,
+    TopicQueueType,
 };
 
 pub struct SubscriberData {
@@ -24,7 +25,7 @@ pub struct SubscriberData {
 
 pub struct Subscriber<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> {
     data: Arc<SubscriberData>,
-    pub callback: Arc<dyn MySbCallback<TMessageModel> + Sync + Send + 'static>,
+    pub callback: Arc<dyn SubscriberCallback<TMessageModel> + Sync + Send + 'static>,
 }
 
 impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync + 'static>
@@ -34,7 +35,7 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync 
         topic_id: String,
         queue_id: String,
         queue_type: TopicQueueType,
-        callback: Arc<dyn MySbCallback<TMessageModel> + Sync + Send + 'static>,
+        callback: Arc<dyn SubscriberCallback<TMessageModel> + Sync + Send + 'static>,
         logger: Arc<dyn Logger + Sync + Send + 'static>,
         client: Arc<dyn MyServiceBusSubscriberClient + Sync + Send + 'static>,
     ) -> Self {

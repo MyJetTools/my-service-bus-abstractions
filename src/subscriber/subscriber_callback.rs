@@ -1,7 +1,7 @@
 use super::{MessagesReader, MySbMessageDeserializer};
 
 #[async_trait::async_trait]
-pub trait MySbCallback<
+pub trait SubscriberCallback<
     TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync + 'static,
 >
 {
