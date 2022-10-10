@@ -10,18 +10,34 @@ pub struct MySbDeliveredMessage<TMessageModel: MySbMessageDeserializer<Item = TM
     pub id: MessageId,
     pub attempt_no: i32,
     pub headers: Option<HashMap<String, String>>,
-    pub content: TMessageModel,
     pub raw: Vec<u8>,
+    pub content: Option<TMessageModel>,
     #[cfg(feature = "with-telemetry")]
     pub my_telemetry_ctx: Option<MyTelemetryContext>,
     #[cfg(feature = "with-telemetry")]
     pub event_tracker: Option<EventDurationTracker>,
 }
 
-#[cfg(feature = "with-telemetry")]
 impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>>
     MySbDeliveredMessage<TMessageModel>
 {
+    pub fn take_message(&mut self) -> TMessageModel {
+        let result = self.content.take();
+        if result.is_none() {
+            panic!("Message was already taken");
+        }
+
+        return result.unwrap();
+    }
+
+    pub fn get_messsage(&self) -> &TMessageModel {
+        if let Some(itm) = self.content.as_ref() {
+            return itm;
+        }
+        panic!("Message was already taken");
+    }
+
+    #[cfg(feature = "with-telemetry")]
     pub fn init_telemetry_context(&mut self, topic_id: &str, queue_id: &str) {
         use crate::MY_TELEMETRY_HEADER;
 
