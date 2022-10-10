@@ -19,4 +19,4 @@ jobs:
         run: cargo build
 
       - name: Build with-telemetry          
-        run: cargo build --features my-telemetry
+        run: cargo build --features with-telemetry

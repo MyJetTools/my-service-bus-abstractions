@@ -90,7 +90,7 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync 
                         id: msg.id,
                         attempt_no: msg.attempt_no,
                         headers: msg.headers,
-                        content: contract,
+                        content: Some(contract),
                         raw: msg.content,
                         my_telemetry_ctx: None,
                         event_tracker: None,
