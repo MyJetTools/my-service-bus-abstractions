@@ -1,4 +1,7 @@
 mod message_to_publish;
+#[cfg(feature = "with-telemetry")]
+mod my_telemetry;
+
 mod publisher;
 mod serializer;
 mod with_internal_queue;

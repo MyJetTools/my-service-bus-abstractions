@@ -1,5 +1,8 @@
 use std::{collections::HashMap, sync::Arc};
 
+#[cfg(feature = "with-telemetry")]
+use my_telemetry::MyTelemetryContext;
+
 use tokio::sync::{
     mpsc::{UnboundedReceiver, UnboundedSender},
     Mutex,
@@ -45,14 +48,27 @@ impl<TMessageModel: MySbMessageSerializer> PublisherWithInternalQueue<TMessageMo
         result
     }
 
-    pub async fn publish_and_forget(&self, message: TMessageModel) -> Result<(), PublishError> {
+    pub async fn publish_and_forget(
+        &self,
+        message: TMessageModel,
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
+    ) -> Result<(), PublishError> {
         let result = message.serialize(None);
 
         if let Err(err) = result {
             return Err(PublishError::SerializationError(err));
         }
 
+        #[cfg(not(feature = "with-telemetry"))]
         let (content, headers) = result.unwrap();
+
+        #[cfg(feature = "with-telemetry")]
+        let (content, mut headers) = result.unwrap();
+
+        #[cfg(feature = "with-telemetry")]
+        if let Some(my_telemetry) = telemetry_context.as_ref() {
+            super::super::my_telemetry::apply_publish_telemetry(&mut headers, my_telemetry)
+        }
 
         let mut write_access = self.data.queue_to_publish.lock().await;
         write_access
@@ -75,6 +91,7 @@ impl<TMessageModel: MySbMessageSerializer> PublisherWithInternalQueue<TMessageMo
     pub async fn publish_chunk_and_forget(
         &self,
         messages: Vec<TMessageModel>,
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let mut to_publish = Vec::with_capacity(messages.len());
 
@@ -85,7 +102,17 @@ impl<TMessageModel: MySbMessageSerializer> PublisherWithInternalQueue<TMessageMo
                 return Err(PublishError::SerializationError(err));
             }
 
+            #[cfg(not(feature = "with-telemetry"))]
             let (content, headers) = result.unwrap();
+
+            #[cfg(feature = "with-telemetry")]
+            let (content, mut headers) = result.unwrap();
+
+            #[cfg(feature = "with-telemetry")]
+            if let Some(my_telemetry) = telemetry_context.as_ref() {
+                super::super::my_telemetry::apply_publish_telemetry(&mut headers, my_telemetry)
+            }
+
             let msg_to_publish = MessageToPublish { headers, content };
             to_publish.push(msg_to_publish);
         }

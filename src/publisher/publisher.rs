@@ -55,14 +55,7 @@ impl<TMessageModel: MySbMessageSerializer> MyServiceBusPublisher<TMessageModel> 
 
         #[cfg(feature = "with-telemetry")]
         if let Some(my_telemetry) = telemetry_context.as_ref() {
-            if headers.is_none() {
-                headers = Some(HashMap::new());
-            }
-
-            headers.as_mut().unwrap().insert(
-                crate::MY_TELEMETRY_HEADER.to_string(),
-                my_telemetry.process_id.to_string(),
-            );
+            super::my_telemetry::apply_publish_telemetry(&mut headers, my_telemetry)
         }
 
         let result = self
@@ -115,14 +108,7 @@ impl<TMessageModel: MySbMessageSerializer> MyServiceBusPublisher<TMessageModel> 
 
         #[cfg(feature = "with-telemetry")]
         if let Some(my_telemetry) = telemetry_context.as_ref() {
-            if headers.is_none() {
-                headers = Some(HashMap::new());
-            }
-
-            headers.as_mut().unwrap().insert(
-                crate::MY_TELEMETRY_HEADER.to_string(),
-                my_telemetry.process_id.to_string(),
-            );
+            super::my_telemetry::apply_publish_telemetry(&mut headers, my_telemetry)
         }
 
         let result = self
@@ -177,14 +163,7 @@ impl<TMessageModel: MySbMessageSerializer> MyServiceBusPublisher<TMessageModel> 
 
             #[cfg(feature = "with-telemetry")]
             if let Some(my_telemetry) = telemetry_context.as_ref() {
-                if headers.is_none() {
-                    headers = Some(HashMap::new());
-                }
-
-                headers.as_mut().unwrap().insert(
-                    crate::MY_TELEMETRY_HEADER.to_string(),
-                    my_telemetry.process_id.to_string(),
-                );
+                super::my_telemetry::apply_publish_telemetry(&mut headers, my_telemetry)
             }
 
             messages_to_publish.push(MessageToPublish { headers, content });
@@ -238,14 +217,7 @@ impl<TMessageModel: MySbMessageSerializer> MyServiceBusPublisher<TMessageModel> 
 
             #[cfg(feature = "with-telemetry")]
             if let Some(my_telemetry) = telemetry_context.as_ref() {
-                if headers.is_none() {
-                    headers = Some(HashMap::new());
-                }
-
-                headers.as_mut().unwrap().insert(
-                    crate::MY_TELEMETRY_HEADER.to_string(),
-                    my_telemetry.process_id.to_string(),
-                );
+                super::my_telemetry::apply_publish_telemetry(&mut headers, my_telemetry)
             }
 
             messages_to_publish.push(MessageToPublish { content, headers });
