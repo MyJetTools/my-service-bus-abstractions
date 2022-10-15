@@ -11,12 +11,13 @@ use crate::{
 use super::SubscriberData;
 
 pub struct MessagesReader<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> {
-    data: Arc<SubscriberData>,
+    pub data: Arc<SubscriberData>,
     total_messages_amount: i64,
     messages: Option<VecDeque<MySbDeliveredMessage<TMessageModel>>>,
     pub confirmation_id: i64,
     delivered: QueueWithIntervals,
     connection_id: i32,
+    current_message: Option<MySbDeliveredMessage<TMessageModel>>,
 }
 
 impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> MessagesReader<TMessageModel> {
@@ -34,6 +35,7 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> MessagesReade
             delivered: QueueWithIntervals::new(),
             total_messages_amount,
             connection_id,
+            current_message: None,
         }
     }
 
@@ -41,9 +43,16 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> MessagesReade
         self.delivered.enqueue(msg.id);
     }
 
-    pub fn get_next_message(&mut self) -> Option<MySbDeliveredMessage<TMessageModel>> {
+    pub fn get_next_message<'s>(
+        &'s mut self,
+    ) -> Option<&'s mut MySbDeliveredMessage<TMessageModel>> {
+        if let Some(message) = self.current_message.take() {
+            self.handled_ok(&message);
+        }
+
         let messages = self.messages.as_mut()?;
-        messages.pop_front()
+        self.current_message = Some(messages.pop_front()?);
+        self.current_message.as_mut()
     }
 
     pub fn get_all(&mut self) -> Option<VecDeque<MySbDeliveredMessage<TMessageModel>>> {

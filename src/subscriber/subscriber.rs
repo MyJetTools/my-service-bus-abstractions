@@ -155,7 +155,23 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync 
         let callback = self.callback.clone();
 
         tokio::spawn(async move {
-            callback.handle_messages(reader).await;
+            let mut reader = reader;
+
+            if let Err(err) = callback.handle_messages(&mut reader).await {
+                let mut ctx = HashMap::new();
+
+                ctx.insert("topicId".to_string(), reader.data.topic_id.to_string());
+                ctx.insert("queueId".to_string(), reader.data.queue_id.to_string());
+                ctx.insert(
+                    "confirmationId".to_string(),
+                    reader.confirmation_id.to_string(),
+                );
+                reader.data.logger.write_fatal_error(
+                    "new_events".to_string(),
+                    format!("Can not handle messages. Err: {}", err.msg),
+                    Some(ctx),
+                );
+            }
         });
     }
 }
