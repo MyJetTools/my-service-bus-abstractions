@@ -39,7 +39,7 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> MessagesReade
         }
     }
 
-    pub fn handled_ok(&mut self, msg: &MySbDeliveredMessage<TMessageModel>) {
+    fn handled_ok(&mut self, msg: &MySbDeliveredMessage<TMessageModel>) {
         self.delivered.enqueue(msg.id);
     }
 
