@@ -43,8 +43,7 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>>
 
         if let Some(headers) = self.headers.as_ref() {
             if let Some(telemetry_value) = headers.get(MY_TELEMETRY_HEADER) {
-                if let Ok(result) = telemetry_value.parse() {
-                    let my_telemery = MyTelemetryContext::restore(result);
+                if let Ok(my_telemery) = MyTelemetryContext::parse_from_string(telemetry_value) {
                     let event_duration_tracker = my_telemery.start_event_tracking(format!(
                         "Handling event {}/{}. MsgId: {}",
                         topic_id, queue_id, self.id
@@ -54,14 +53,5 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>>
                 }
             }
         }
-    }
-
-    #[cfg(feature = "with-telemetry")]
-    pub fn get_telemetry(&self) -> MyTelemetryContext {
-        if let Some(my_telemetry) = self.my_telemetry_ctx {
-            return my_telemetry;
-        }
-
-        MyTelemetryContext::new()
     }
 }

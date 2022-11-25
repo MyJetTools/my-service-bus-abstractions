@@ -12,6 +12,6 @@ pub fn apply_publish_telemetry(
 
     headers.as_mut().unwrap().insert(
         crate::MY_TELEMETRY_HEADER.to_string(),
-        my_telemetry.process_id.to_string(),
+        my_telemetry.as_string(),
     );
 }
