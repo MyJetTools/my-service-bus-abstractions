@@ -51,7 +51,7 @@ impl<TMessageModel: MySbMessageSerializer> PublisherWithInternalQueue<TMessageMo
     pub async fn publish_and_forget(
         &self,
         message: TMessageModel,
-        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<&MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let result = message.serialize(None);
 
@@ -91,7 +91,7 @@ impl<TMessageModel: MySbMessageSerializer> PublisherWithInternalQueue<TMessageMo
     pub async fn publish_chunk_and_forget(
         &self,
         messages: Vec<TMessageModel>,
-        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<&MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let mut to_publish = Vec::with_capacity(messages.len());
 

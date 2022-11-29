@@ -35,7 +35,7 @@ impl<TMessageModel: MySbMessageSerializer> MyServiceBusPublisher<TMessageModel> 
     pub async fn publish(
         &self,
         message: &TMessageModel,
-        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<&MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let content = message.serialize(None);
 
@@ -84,7 +84,7 @@ impl<TMessageModel: MySbMessageSerializer> MyServiceBusPublisher<TMessageModel> 
         &self,
         message: &TMessageModel,
         headers: HashMap<String, String>,
-        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<&MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let content = message.serialize(Some(headers));
 
@@ -136,7 +136,7 @@ impl<TMessageModel: MySbMessageSerializer> MyServiceBusPublisher<TMessageModel> 
     pub async fn publish_messages(
         &self,
         messages: &[TMessageModel],
-        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<&MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let mut messages_to_publish = Vec::with_capacity(messages.len());
 
@@ -190,7 +190,7 @@ impl<TMessageModel: MySbMessageSerializer> MyServiceBusPublisher<TMessageModel> 
     pub async fn publish_messages_with_header(
         &self,
         messages: Vec<(TMessageModel, Option<HashMap<String, String>>)>,
-        #[cfg(feature = "with-telemetry")] telemetry_context: Option<MyTelemetryContext>,
+        #[cfg(feature = "with-telemetry")] telemetry_context: Option<&MyTelemetryContext>,
     ) -> Result<(), PublishError> {
         let mut messages_to_publish = Vec::with_capacity(messages.len());
 
