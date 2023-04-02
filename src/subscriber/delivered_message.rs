@@ -46,7 +46,9 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>>
                 if let Ok(my_telemetry) = MyTelemetryContext::parse_from_string(telemetry_value) {
                     let event_duration_tracker = my_telemetry.start_event_tracking(format!(
                         "Handling event {}/{}. MsgId: {}",
-                        topic_id, queue_id, self.id
+                        topic_id,
+                        queue_id,
+                        self.id.get_value()
                     ));
                     self.my_telemetry_ctx = Some(my_telemetry);
                     self.event_tracker = Some(event_duration_tracker)
