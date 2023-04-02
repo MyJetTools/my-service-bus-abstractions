@@ -6,7 +6,7 @@ impl MessageId {
         Self(value)
     }
 
-    pub fn from(value: Option<i64>) -> Option<Self> {
+    pub fn from_opt_i64(value: Option<i64>) -> Option<Self> {
         let value = value?;
         Some(Self(value))
     }
