@@ -16,3 +16,9 @@ impl AsRef<i64> for MessageId {
         &self.0
     }
 }
+
+impl Into<MessageId> for i64 {
+    fn into(self) -> MessageId {
+        MessageId::new(self)
+    }
+}
