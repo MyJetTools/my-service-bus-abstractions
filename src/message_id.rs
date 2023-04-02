@@ -22,3 +22,9 @@ impl Into<MessageId> for i64 {
         MessageId::new(self)
     }
 }
+
+impl Into<i64> for MessageId {
+    fn into(self) -> i64 {
+        self.0
+    }
+}
