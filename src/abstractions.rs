@@ -1,7 +1,5 @@
 use crate::{publisher::MessageToPublish, subscriber::TopicQueueType, MySbMessage, PublishError};
 
-pub type MessageId = i64;
-
 #[cfg(feature = "with-telemetry")]
 pub const MY_TELEMETRY_HEADER: &str = "process-id";
 
