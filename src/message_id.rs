@@ -6,6 +6,11 @@ impl MessageId {
         Self(value)
     }
 
+    pub fn from(value: Option<i64>) -> Option<Self> {
+        let value = value?;
+        Some(Self(value))
+    }
+
     pub fn get_value(&self) -> i64 {
         self.0
     }
