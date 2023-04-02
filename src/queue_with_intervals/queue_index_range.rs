@@ -1,4 +1,3 @@
-use crate::MessageId;
 
 pub enum QueueIndexRangeCompare {
     Below,
@@ -14,23 +13,23 @@ pub enum RemoveResult{
 
 #[derive(Debug, Clone)]
 pub struct QueueIndexRange {
-    pub from_id: MessageId,
-    pub to_id: MessageId,
+    pub from_id: i64,
+    pub to_id: i64,
 }
 
 impl QueueIndexRange {
-    pub fn restore(from_id: MessageId, to_id: MessageId) -> QueueIndexRange {
+    pub fn restore(from_id: i64, to_id: i64) -> QueueIndexRange {
         QueueIndexRange { from_id, to_id }
     }
 
-    pub fn new_empty(start_id: MessageId) -> QueueIndexRange {
+    pub fn new_empty(start_id: i64) -> QueueIndexRange {
         QueueIndexRange {
             from_id: start_id,
             to_id: start_id - 1,
         }
     }
 
-    pub fn new_with_single_value(value: MessageId) -> QueueIndexRange {
+    pub fn new_with_single_value(value: i64) -> QueueIndexRange {
         QueueIndexRange {
             from_id: value,
             to_id: value,
@@ -46,21 +45,21 @@ impl QueueIndexRange {
         return false;
     }
 
-    pub fn is_in_my_interval(&self, id: MessageId)->bool{
+    pub fn is_in_my_interval(&self, id: i64)->bool{
         id >= self.from_id && id <= self.to_id
     }
 
 
 
-    pub fn can_be_joined_to_interval_from_the_left(&self, id: MessageId)->bool{
+    pub fn can_be_joined_to_interval_from_the_left(&self, id: i64)->bool{
        self.from_id -1 <= id && id <= self.to_id
     }
 
-    pub fn can_be_joined_to_interval_from_the_right(&self, id: MessageId)->bool{
+    pub fn can_be_joined_to_interval_from_the_right(&self, id: i64)->bool{
         self.from_id <= id && id <= self.to_id +1
     }
 
-    pub fn is_my_interval_to_remove(&self, id: MessageId) -> bool {
+    pub fn is_my_interval_to_remove(&self, id: i64) -> bool {
         if self.is_empty() {
             panic!("We are trying to find interval to remove but we bumped empty interval");
         }
@@ -72,7 +71,7 @@ impl QueueIndexRange {
         self.to_id = self.from_id - 1;
     }
 
-    pub fn remove(&mut self, message_id: MessageId) -> RemoveResult {
+    pub fn remove(&mut self, message_id: i64) -> RemoveResult {
 
 
         if self.from_id == message_id && self.to_id == message_id{
@@ -103,7 +102,7 @@ impl QueueIndexRange {
     }
 
 
-    pub fn dequeue(&mut self) -> Option<MessageId> {
+    pub fn dequeue(&mut self) -> Option<i64> {
         if self.from_id > self.to_id {
             return None;
         }
@@ -113,7 +112,7 @@ impl QueueIndexRange {
         Some(result)
     }
 
-    pub fn peek(&self) -> Option<MessageId> {
+    pub fn peek(&self) -> Option<i64> {
         if self.from_id > self.to_id {
             return None;
         }
@@ -121,7 +120,7 @@ impl QueueIndexRange {
         return Some(self.from_id);
     }
 
-    pub fn enqueue(&mut self, id: MessageId) {
+    pub fn enqueue(&mut self, id: i64) {
         if self.is_empty() {
             self.from_id = id;
             self.to_id = id;
@@ -130,7 +129,7 @@ impl QueueIndexRange {
 
         if self.from_id >= id && self.to_id <= id {
             panic!(
-                "Warning.... Something went wrong. We are enqueieng the Value {} wich is already in the queue. Range: {:?}. ",
+                "Warning.... Something went wrong. We are enqueueing the Value {} which is already in the queue. Range: {:?}. ",
                 id, self, 
             );
         } else if self.to_id + 1 == id {
@@ -154,7 +153,7 @@ impl QueueIndexRange {
         return false;
     }
 
-    pub fn try_join(&mut self, id_to_join: MessageId) -> bool {
+    pub fn try_join(&mut self, id_to_join: i64) -> bool {
         if self.is_empty() {
             self.from_id = id_to_join;
             self.to_id = id_to_join;
@@ -177,11 +176,11 @@ impl QueueIndexRange {
         self.to_id < self.from_id
     }
 
-    pub fn is_before(&self, id: MessageId) -> bool {
+    pub fn is_before(&self, id: i64) -> bool {
         id < self.from_id - 1
     }
 
-    pub fn compare_with(&self, id: MessageId) -> Option<QueueIndexRangeCompare> {
+    pub fn compare_with(&self, id: i64) -> Option<QueueIndexRangeCompare> {
         if self.is_empty() {
             return None;
         }
@@ -207,7 +206,7 @@ impl QueueIndexRange {
         return format!("{} - {}", self.from_id, self.to_id);
     }
 
-    pub fn len(&self) -> MessageId {
+    pub fn len(&self) -> i64 {
         self.to_id - self.from_id + 1
     }
 }

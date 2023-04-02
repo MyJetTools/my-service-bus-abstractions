@@ -117,7 +117,7 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync 
                             err
                         ));
                     }
-                    can_not_serialize_messages.enqueue(msg.id);
+                    can_not_serialize_messages.enqueue(msg.id.get_value());
                 }
             }
         }

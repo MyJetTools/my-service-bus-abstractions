@@ -1,9 +1,7 @@
-use crate::MessageId;
-
 use super::{QueueIndexRange, QueueWithIntervals};
 
 impl QueueWithIntervals {
-    pub fn split(&self, id: MessageId) -> (Option<QueueWithIntervals>, Option<QueueWithIntervals>) {
+    pub fn split(&self, id: i64) -> (Option<QueueWithIntervals>, Option<QueueWithIntervals>) {
         let min_id = self.get_min_id();
 
         if min_id.is_none() {

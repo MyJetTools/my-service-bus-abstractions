@@ -40,7 +40,7 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> MessagesReade
     }
 
     fn handled_ok(&mut self, msg: &MySbDeliveredMessage<TMessageModel>) {
-        self.delivered.enqueue(msg.id);
+        self.delivered.enqueue(msg.id.get_value());
     }
 
     pub fn get_next_message<'s>(

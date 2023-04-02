@@ -30,7 +30,7 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>>
         return result.unwrap();
     }
 
-    pub fn get_messsage(&self) -> &TMessageModel {
+    pub fn get_message(&self) -> &TMessageModel {
         if let Some(itm) = self.content.as_ref() {
             return itm;
         }
@@ -43,12 +43,12 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>>
 
         if let Some(headers) = self.headers.as_ref() {
             if let Some(telemetry_value) = headers.get(MY_TELEMETRY_HEADER) {
-                if let Ok(my_telemery) = MyTelemetryContext::parse_from_string(telemetry_value) {
-                    let event_duration_tracker = my_telemery.start_event_tracking(format!(
+                if let Ok(my_telemetry) = MyTelemetryContext::parse_from_string(telemetry_value) {
+                    let event_duration_tracker = my_telemetry.start_event_tracking(format!(
                         "Handling event {}/{}. MsgId: {}",
                         topic_id, queue_id, self.id
                     ));
-                    self.my_telemetry_ctx = Some(my_telemery);
+                    self.my_telemetry_ctx = Some(my_telemetry);
                     self.event_tracker = Some(event_duration_tracker)
                 }
             }

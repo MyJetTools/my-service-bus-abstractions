@@ -1,7 +1,4 @@
-use crate::{
-    queue_with_intervals::queue_index_range::{QueueIndexRange, RemoveResult},
-    MessageId,
-};
+use crate::queue_with_intervals::queue_index_range::{QueueIndexRange, RemoveResult};
 
 use super::{iterator::QueueWithIntervalsIterator, queue_index_range::QueueIndexRangeCompare};
 
@@ -27,7 +24,7 @@ impl QueueWithIntervals {
         return Self { intervals };
     }
 
-    pub fn from_single_interval(from_id: MessageId, to_id: MessageId) -> Self {
+    pub fn from_single_interval(from_id: i64, to_id: i64) -> Self {
         let mut result = Self {
             intervals: Vec::new(),
         };
@@ -53,7 +50,7 @@ impl QueueWithIntervals {
         }
     }
 
-    pub fn remove(&mut self, id: MessageId) -> Result<(), QueueWithIntervalsError> {
+    pub fn remove(&mut self, id: i64) -> Result<(), QueueWithIntervalsError> {
         if self.intervals.len() == 0 {
             return Err(QueueWithIntervalsError::QueueIsEmpty);
         }
@@ -81,7 +78,7 @@ impl QueueWithIntervals {
         return Err(QueueWithIntervalsError::MessagesNotFound);
     }
 
-    pub fn enqueue(&mut self, message_id: MessageId) {
+    pub fn enqueue(&mut self, message_id: i64) {
         match self.intervals.get_mut(0) {
             Some(el) => {
                 if el.is_empty() {
@@ -116,21 +113,21 @@ impl QueueWithIntervals {
         }
 
         match found_index {
-            Some(index_we_handeled) => {
-                if index_we_handeled > 0 {
-                    let current_el = self.intervals.get(index_we_handeled).unwrap().clone();
-                    let before_el = self.intervals.get_mut(index_we_handeled - 1).unwrap();
+            Some(index_we_handled) => {
+                if index_we_handled > 0 {
+                    let current_el = self.intervals.get(index_we_handled).unwrap().clone();
+                    let before_el = self.intervals.get_mut(index_we_handled - 1).unwrap();
                     if before_el.try_join_with_the_next_one(current_el) {
-                        self.intervals.remove(index_we_handeled);
+                        self.intervals.remove(index_we_handled);
                     }
                 }
 
-                if index_we_handeled < self.intervals.len() - 1 {
-                    let after_el = self.intervals.get(index_we_handeled + 1).unwrap().clone();
+                if index_we_handled < self.intervals.len() - 1 {
+                    let after_el = self.intervals.get(index_we_handled + 1).unwrap().clone();
 
-                    let current_el = self.intervals.get_mut(index_we_handeled).unwrap();
+                    let current_el = self.intervals.get_mut(index_we_handled).unwrap();
                     if current_el.try_join_with_the_next_one(after_el) {
-                        self.intervals.remove(index_we_handeled + 1);
+                        self.intervals.remove(index_we_handled + 1);
                     }
                 }
             }
@@ -287,7 +284,7 @@ impl QueueWithIntervals {
         self.intervals.push(range_to_insert.clone());
     }
 
-    pub fn dequeue(&mut self) -> Option<MessageId> {
+    pub fn dequeue(&mut self) -> Option<i64> {
         let first_interval = self.intervals.get_mut(0)?;
 
         let result = first_interval.dequeue();
@@ -299,7 +296,7 @@ impl QueueWithIntervals {
         result
     }
 
-    pub fn peek(&self) -> Option<MessageId> {
+    pub fn peek(&self) -> Option<i64> {
         let first_interval = self.intervals.get(0)?;
 
         first_interval.peek()
@@ -319,7 +316,7 @@ impl QueueWithIntervals {
         self.intervals.clone()
     }
 
-    pub fn get_min_id(&self) -> Option<MessageId> {
+    pub fn get_min_id(&self) -> Option<i64> {
         if self.len() == 0 {
             return None;
         }
@@ -329,7 +326,7 @@ impl QueueWithIntervals {
         Some(result.from_id)
     }
 
-    pub fn get_max_id(&self) -> Option<MessageId> {
+    pub fn get_max_id(&self) -> Option<i64> {
         if self.len() == 0 {
             return None;
         }
@@ -339,7 +336,7 @@ impl QueueWithIntervals {
         Some(result.to_id)
     }
 
-    pub fn has_message(&self, id: MessageId) -> bool {
+    pub fn has_message(&self, id: i64) -> bool {
         for item in &self.intervals {
             if let Some(range) = item.compare_with(id) {
                 if let QueueIndexRangeCompare::Inside = range {
@@ -552,7 +549,7 @@ mod tests {
     }
 
     #[test]
-    fn one_insert_one_remove_len_shoud_be_0() {
+    fn one_insert_one_remove_len_should_be_0() {
         let mut queue = QueueWithIntervals::new();
 
         queue.enqueue(20466);
@@ -617,7 +614,7 @@ mod tests {
     }
 
     #[test]
-    fn enqueue_range_at_the_begining() {
+    fn enqueue_range_at_the_beginning() {
         //Preparing data
         let mut queue = QueueWithIntervals::new();
         queue.enqueue_range(&QueueIndexRange::restore(15, 20));
@@ -635,7 +632,7 @@ mod tests {
     }
 
     #[test]
-    fn enqueue_range_at_the_begining_joining_the_first_one() {
+    fn enqueue_range_at_the_beginning_joining_the_first_one() {
         //Preparing data
         let mut queue = QueueWithIntervals::new();
         queue.enqueue_range(&QueueIndexRange::restore(15, 20));
@@ -650,7 +647,7 @@ mod tests {
     }
 
     #[test]
-    fn enqueue_range_at_the_begining_joining_the_first_one_case_2() {
+    fn enqueue_range_at_the_beginning_joining_the_first_one_case_2() {
         //Preparing data
         let mut queue = QueueWithIntervals::new();
         queue.enqueue_range(&QueueIndexRange::restore(20, 25));
@@ -749,7 +746,7 @@ mod tests {
     }
 
     #[test]
-    fn enqueue_range_in_the_middle_stick_to_the_rught_including() {
+    fn enqueue_range_in_the_middle_stick_to_the_right_including() {
         //Preparing data
         let mut queue = QueueWithIntervals::new();
         queue.enqueue_range(&QueueIndexRange::restore(100, 105));
@@ -898,7 +895,7 @@ mod tests {
     }
 
     #[test]
-    fn test_clean_several_interavals() {
+    fn test_clean_several_intervals() {
         let mut queue = QueueWithIntervals::new();
         queue.enqueue(2);
         assert_eq!(1, queue.len());

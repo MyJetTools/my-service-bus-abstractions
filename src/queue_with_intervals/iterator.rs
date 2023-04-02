@@ -1,5 +1,3 @@
-use crate::MessageId;
-
 use super::{QueueIndexRange, QueueWithIntervals};
 
 pub struct QueueWithIntervalsIterator {
@@ -21,8 +19,8 @@ impl Iterator for QueueWithIntervalsIterator {
 }
 
 pub struct QueueIndexRangeIterator {
-    from_id: MessageId,
-    to_id: MessageId,
+    from_id: i64,
+    to_id: i64,
 }
 
 impl QueueIndexRangeIterator {
@@ -34,9 +32,9 @@ impl QueueIndexRangeIterator {
     }
 }
 impl Iterator for QueueIndexRangeIterator {
-    type Item = MessageId;
+    type Item = i64;
 
-    fn next(&mut self) -> Option<MessageId> {
+    fn next(&mut self) -> Option<i64> {
         if self.from_id <= self.to_id {
             let result = self.from_id;
             self.from_id = self.from_id + 1;
