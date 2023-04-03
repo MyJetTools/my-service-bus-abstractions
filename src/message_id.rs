@@ -41,3 +41,19 @@ impl Into<i64> for MessageId {
         self.0
     }
 }
+
+pub trait AsMessageId {
+    fn as_message_id(self) -> MessageId;
+}
+
+impl AsMessageId for i64 {
+    fn as_message_id(self) -> MessageId {
+        MessageId::new(self)
+    }
+}
+
+impl AsMessageId for MessageId {
+    fn as_message_id(self) -> MessageId {
+        self
+    }
+}
