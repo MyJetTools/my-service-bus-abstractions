@@ -24,6 +24,10 @@ impl MessageId {
     pub fn clone_with_delta(&self, delta: i64) -> Self {
         Self(self.0 + delta)
     }
+
+    pub fn from_le_bytes(le_bytes: [u8; 8]) -> MessageId {
+        MessageId::new(i64::from_le_bytes(le_bytes))
+    }
 }
 
 impl Display for MessageId {
