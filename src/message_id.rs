@@ -20,6 +20,10 @@ impl MessageId {
     pub fn increment(&mut self) {
         self.0 += 1;
     }
+
+    pub fn clone_with_delta(&self, delta: i64) -> Self {
+        Self(self.0 + delta)
+    }
 }
 
 impl Display for MessageId {
