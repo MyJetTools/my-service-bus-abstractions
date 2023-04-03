@@ -1,7 +1,6 @@
 mod abstractions;
 mod errors;
 mod message_id;
-mod message_to_publish;
 mod my_sb_message;
 pub mod publisher;
 pub mod queue_with_intervals;
@@ -9,5 +8,4 @@ pub mod subscriber;
 pub use abstractions::*;
 pub use errors::*;
 pub use message_id::*;
-pub use message_to_publish::*;
 pub use my_sb_message::*;
