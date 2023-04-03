@@ -16,6 +16,10 @@ impl MessageId {
     pub fn get_value(&self) -> i64 {
         self.0
     }
+
+    pub fn increment(&mut self) {
+        self.0 += 1;
+    }
 }
 
 impl Display for MessageId {
