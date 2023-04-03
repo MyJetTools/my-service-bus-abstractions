@@ -48,6 +48,12 @@ impl Into<MessageId> for i64 {
     }
 }
 
+impl<'s> Into<MessageId> for &'s i64 {
+    fn into(self) -> MessageId {
+        MessageId::new(*self)
+    }
+}
+
 impl Into<i64> for MessageId {
     fn into(self) -> i64 {
         self.0
