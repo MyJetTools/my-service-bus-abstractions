@@ -5,7 +5,7 @@ use crate::MessageId;
 pub trait MyServiceBusMessage {
     fn get_id(&self) -> MessageId;
     fn get_attempt_no(&self) -> i32;
-    fn get_headers(&self) -> &Option<HashMap<String, String>>;
+    fn get_headers(&self) -> Option<&HashMap<String, String>>;
     fn get_content(&self) -> &[u8];
 }
 
@@ -26,8 +26,8 @@ impl MyServiceBusMessage for MySbMessage {
         self.attempt_no
     }
 
-    fn get_headers(&self) -> &Option<HashMap<String, String>> {
-        &self.headers
+    fn get_headers(&self) -> Option<&HashMap<String, String>> {
+        self.headers.as_ref()
     }
 
     fn get_content(&self) -> &[u8] {
