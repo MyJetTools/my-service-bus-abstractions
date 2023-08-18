@@ -3,7 +3,7 @@ use std::{
     sync::Arc,
 };
 
-use rust_extensions::Logger;
+use rust_extensions::{Logger, StrOrString};
 
 use crate::{
     queue_with_intervals::QueueWithIntervals, MySbMessage, MyServiceBusSubscriberClient,
@@ -16,8 +16,8 @@ use super::{
 };
 
 pub struct SubscriberData {
-    pub topic_id: String,
-    pub queue_id: String,
+    pub topic_id: StrOrString<'static>,
+    pub queue_id: StrOrString<'static>,
     pub queue_type: TopicQueueType,
     pub logger: Arc<dyn Logger + Sync + Send + 'static>,
     pub client: Arc<dyn MyServiceBusSubscriberClient + Sync + Send + 'static>,
@@ -32,8 +32,8 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync 
     Subscriber<TMessageModel>
 {
     pub fn new(
-        topic_id: String,
-        queue_id: String,
+        topic_id: StrOrString<'static>,
+        queue_id: StrOrString<'static>,
         queue_type: TopicQueueType,
         callback: Arc<dyn SubscriberCallback<TMessageModel> + Sync + Send + 'static>,
         logger: Arc<dyn Logger + Sync + Send + 'static>,
@@ -124,8 +124,8 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync 
 
         if messages.len() == 0 {
             self.data.client.confirm_delivery(
-                &self.data.topic_id,
-                &self.data.queue_id,
+                self.data.topic_id.as_str(),
+                self.data.queue_id.as_str(),
                 confirmation_id,
                 connection_id,
                 true,
@@ -133,8 +133,14 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync 
 
             let mut ctx = HashMap::new();
 
-            ctx.insert("topicId".to_string(), self.data.topic_id.to_string());
-            ctx.insert("queueId".to_string(), self.data.queue_id.to_string());
+            ctx.insert(
+                "topicId".to_string(),
+                self.data.topic_id.as_str().to_string(),
+            );
+            ctx.insert(
+                "queueId".to_string(),
+                self.data.queue_id.as_str().to_string(),
+            );
             ctx.insert(
                 "messages".to_string(),
                 format!("{:?}", can_not_serialize_messages),
@@ -160,8 +166,14 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel> + Send + Sync 
             if let Err(err) = callback.handle_messages(&mut reader).await {
                 let mut ctx = HashMap::new();
 
-                ctx.insert("topicId".to_string(), reader.data.topic_id.to_string());
-                ctx.insert("queueId".to_string(), reader.data.queue_id.to_string());
+                ctx.insert(
+                    "topicId".to_string(),
+                    reader.data.topic_id.as_str().to_string(),
+                );
+                ctx.insert(
+                    "queueId".to_string(),
+                    reader.data.queue_id.as_str().to_string(),
+                );
                 ctx.insert(
                     "confirmationId".to_string(),
                     reader.confirmation_id.to_string(),

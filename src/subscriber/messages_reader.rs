@@ -79,8 +79,14 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> Drop
                 self.confirmation_id.to_string(),
             );
 
-            log_context.insert("TopicId".to_string(), self.data.topic_id.to_string());
-            log_context.insert("QueueId".to_string(), self.data.queue_id.to_string());
+            log_context.insert(
+                "TopicId".to_string(),
+                self.data.topic_id.as_str().to_string(),
+            );
+            log_context.insert(
+                "QueueId".to_string(),
+                self.data.queue_id.as_str().to_string(),
+            );
 
             self.data.logger.write_error(
                 "Sending delivery confirmation".to_string(),
@@ -102,8 +108,14 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>> Drop
                 self.confirmation_id.to_string(),
             );
 
-            log_context.insert("TopicId".to_string(), self.data.topic_id.to_string());
-            log_context.insert("QueueId".to_string(), self.data.queue_id.to_string());
+            log_context.insert(
+                "TopicId".to_string(),
+                self.data.topic_id.as_str().to_string(),
+            );
+            log_context.insert(
+                "QueueId".to_string(),
+                self.data.queue_id.as_str().to_string(),
+            );
 
             self.data.logger.write_error(
                 "Sending delivery confirmation".to_string(),
