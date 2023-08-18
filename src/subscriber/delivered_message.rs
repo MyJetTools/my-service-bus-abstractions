@@ -56,4 +56,13 @@ impl<TMessageModel: MySbMessageDeserializer<Item = TMessageModel>>
             }
         }
     }
+
+    #[cfg(feature = "with-telemetry")]
+    pub fn take_or_create_telemetry(&mut self) -> MyTelemetryContext {
+        if let Some(my_telemetry_ctx) = self.my_telemetry_ctx.take() {
+            return my_telemetry_ctx;
+        }
+
+        MyTelemetryContext::new()
+    }
 }
